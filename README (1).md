@@ -1,43 +1,32 @@
 # Low-Power VLSI Design — Clock Gating & Power Domains
-### Resume Project | Final Year ECE | VLSI / RTL Design
-
----
-
 ## Project Overview
-
 This project demonstrates **industry-standard low-power design techniques** used in modern SoCs (System-on-Chip). It implements three key concepts:
 
 1. **Integrated Clock Gating (ICG)** — disables clock to idle logic blocks
 2. **Power Domain Management** — independently powers up/down functional blocks
 3. **Retention Registers** — preserves state across power-down cycles
-
 These techniques are critical in chips like mobile processors (Snapdragon, Apple A-series) and IoT SoCs where minimizing power consumption is the #1 design constraint.
-
----
-
 ## Architecture
-
-```
                     ┌─────────────────────────────────────────┐
-                    │           low_power_top                 │
-                    │                                         │
-  clk ──────────────┼──► ICG_ALU ──► gated_clk_alu ──►       │
+                    │             low_power_top               │
+                    │                                         |
+  clk ──────────────┼──► ICG_ALU ──► gated_clk_alu ──►        │
                     │                              ALU Domain │
                     │                           (PD_ALU)      │
-                    │                              │           │
+                    │                              │          │
                     │                         iso_cells       │
-                    │                              │           │
+                    │                              │          │
                     │                         alu_result ────►│──► output
                     │                                         │
-  clk ──────────────┼──► ICG_MEM ──► gated_clk_mem ──►       │
+  clk ──────────────┼──► ICG_MEM ──► gated_clk_mem ──►        │
                     │                              MEM Domain │
                     │                           (PD_MEM)      │
-                    │                              │           │
+                    │                              │          │
                     │                         iso_cells       │
-                    │                              │           │
+                    │                              │          │
                     │                        mem_rd_data ────►│──► output
                     │                                         │
-  clk ──────────────┼────────────────────► CTRL Domain       │
+  clk ──────────────┼──────────────────--─► CTRL Domain       │
                     │                       (Always-On)       │
                     │                    manages: pwr_en,     │
                     │                    clk_en, iso_en,      │
