@@ -1,29 +1,8 @@
-// =============================================================================
-// Project      : Low-Power Design with Clock Gating & Power Domains
-// File         : low_power_design.v
-// Description  : Demonstrates integrated clock gating (ICG), power domain
-//                isolation, and retention registers for VLSI low-power design.
-//
-// Architecture :
-//   - TOP module instantiates 3 sub-blocks in separate power domains:
-//       1. ALU Domain   (PD_ALU)   - arithmetic/logic unit
-//       2. MEM Domain   (PD_MEM)   - register file / memory block
-//       3. CTRL Domain  (PD_CTRL)  - always-on control logic
-//
-//   - Each domain has its own:
-//       * Integrated Clock Gate (ICG)
-//       * Power-enable signal (pwr_en_*)
-//       * Isolation cells on outputs
-//       * Retention register example
-// =============================================================================
-
 `timescale 1ns/1ps
 
-// =============================================================================
 // INTEGRATED CLOCK GATE (ICG) CELL
-// Industry-standard latch-based clock gating cell
 // The latch eliminates glitches on gated_clk
-// =============================================================================
+
 module icg_cell (
     input  wire clk,        // Free-running clock
     input  wire enable,     // Clock enable (from controller)
@@ -94,12 +73,10 @@ module retention_reg #(parameter WIDTH = 8) (
 
 endmodule
 
-
-// =============================================================================
 // ALU DOMAIN (PD_ALU)
 // Simple 8-bit ALU: add, subtract, AND, OR
 // Powered down when idle via clock gating + power enable
-// =============================================================================
+
 module alu_domain (
     input  wire        gated_clk,   // Gated clock from ICG
     input  wire        rst_n,
@@ -131,11 +108,11 @@ module alu_domain (
 endmodule
 
 
-// =============================================================================
+
 // MEMORY DOMAIN (PD_MEM)
 // 8-entry x 8-bit register file with retention support
 // Powered down between bursts; state retained in shadow latches
-// =============================================================================
+
 module mem_domain (
     input  wire        gated_clk,
     input  wire        rst_n,
@@ -180,11 +157,10 @@ module mem_domain (
 endmodule
 
 
-// =============================================================================
 // CONTROL DOMAIN (PD_CTRL) — ALWAYS ON
 // Manages power sequencing, clock enables, isolation, and retention signals
 // This domain never powers down
-// =============================================================================
+
 module ctrl_domain (
     input  wire        clk,         // Always-on clock
     input  wire        rst_n,
@@ -280,11 +256,9 @@ module ctrl_domain (
 
 endmodule
 
-
-// =============================================================================
 // TOP MODULE
 // Integrates all domains, ICG cells, and isolation cells
-// =============================================================================
+
 module low_power_top (
     input  wire        clk,
     input  wire        rst_n,
@@ -337,7 +311,7 @@ module low_power_top (
         .gated_clk  (gated_clk_mem)
     );
 
-    // ---- Control Domain (Always On) ----
+
     ctrl_domain u_ctrl (
         .clk         (clk),
         .rst_n       (rst_n),
@@ -353,8 +327,6 @@ module low_power_top (
         .restore_mem (restore_mem),
         .power_state (power_state)
     );
-
-    // ---- ALU Domain ----
     alu_domain u_alu (
         .gated_clk  (gated_clk_alu),
         .rst_n      (rst_n),
@@ -365,8 +337,6 @@ module low_power_top (
         .result     (alu_result_raw),
         .valid_out  (alu_valid_raw)
     );
-
-    // ---- Memory Domain ----
     mem_domain u_mem (
         .gated_clk  (gated_clk_mem),
         .rst_n      (rst_n),
@@ -378,9 +348,6 @@ module low_power_top (
         .save       (save_mem),
         .restore    (restore_mem)
     );
-
-    // ---- Isolation Cells on Domain Outputs ----
-    // ALU result bits
     genvar i;
     generate
         for (i = 0; i < 9; i = i+1) begin : iso_alu_result
@@ -397,8 +364,6 @@ module low_power_top (
         .iso_en   (iso_en_alu),
         .data_out (alu_valid)
     );
-
-    // MEM read data bits
     generate
         for (i = 0; i < 8; i = i+1) begin : iso_mem_rd
             iso_cell u_iso (
